@@ -1,0 +1,312 @@
+<html>
+<head>
+	<title>Tiles Matching</title>
+	<style>
+        *{
+            font-size: 20px;
+            font-family: Consolas, Lucida Console, monospace;
+        }
+		table tr td {
+			background-color: #CE9DFF;
+			cursor: pointer;
+			height: 100px;
+			width: 100px;
+		}
+		table tr td img {
+			height: 100px;
+			width: 100px;
+		}
+		.scr {
+			color: #993300;
+		}
+	</style>
+</head>
+<body>
+<!--fb start-->
+<script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '{727915880613752}',
+          xfbml      : true,
+          version    : 'v2.0'
+        });
+      };
+	
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+<!--fb end-->
+<h1 align="center">বোম্বাগড়ের খেলা</h1>
+<!--fb start-->
+<div align="center">
+	<div
+		class="fb-like"
+		data-send="true"
+		data-width="450"
+		data-show-faces="true">
+	</div>
+</div>
+<!--fb end-->
+<p align="center" style="color:blue">Match the Tiles as fast as you can!!!</p>
+	<table align="center">
+		<tr align="center">
+			<td id="timer" colspan="2" class="scr"></td>
+			<td id="state" colspan="1" class="scr"></td>
+            		<td id="wait" colspan="1" class="scr"></td>
+		</tr>
+		<tr>
+			<td onclick="play(this)" id="1" ></td>
+			<td onclick="play(this)" id="2" ></td>
+			<td onclick="play(this)" id="3" ></td>
+			<td onclick="play(this)" id="4" ></td>
+			 
+		</tr>
+		<tr>
+			<td onclick="play(this)" id="5" ></td>
+			<td onclick="play(this)" id="6" ></td>
+			<td onclick="play(this)" id="7" ></td>
+			<td onclick="play(this)" id="8" ></td>
+			 
+		</tr>
+		<tr>
+			<td onclick="play(this)" id="9"></td>
+			<td onclick="play(this)" id="10" ></td>
+			<td onclick="play(this)" id="11" ></td>
+			<td onclick="play(this)" id="12" ></td>
+			 
+		</tr>
+		<tr>
+			<td onclick="play(this)" id="13" ></td>
+			<td onclick="play(this)" id="14" ></td>
+			<td onclick="play(this)" id="15" ></td>
+			<td onclick="play(this)" id="16" ></td>
+			 
+		</tr>
+		<tr align="center">
+			<td colspan="2" id="stbtn" onclick="start()">Start Game</td>
+			<td colspan="2" id="reset" onclick="reset()">Reset</td>
+		</tr>
+	</table>
+	<div align="center">
+		<div>Dedicated to <a href="http://en.wikipedia.org/wiki/Sukumar_Ray">Sukumar Ray (সুকুমার রায়)</a></div>
+		<div><a href="http://sukumarray.freehostia.com/view.php?cat_id=1&article_id=28">Read বোম্বাগড়ের রাজা</a></div>
+		<div><a href="https://www.facebook.com/mail.prome">About Developer</a></div>
+	</div>
+	<h1 id="msg" align="center"></h1>
+	<script type="text/javascript">
+	var imgs = new Array(20);
+	var clickCnt = 0;
+	var clickIdx = 0;
+	var vis = new Array(20);
+    var myVar=setInterval(function(){stopTimer()},3000);
+    var d, chg, nw;
+
+    // game timer
+    function changeTime() {
+        chg = setInterval(function(){editTimer()},1000);
+    }
+    // edit game timer, interval 1 scs
+    function editTimer() {
+        var tmp = document.getElementById('timer');
+        nw = new Date();
+        var diff = nw - d;
+
+        var msec = diff;
+        var hh = Math.floor(msec / 1000 / 60 / 60);
+        msec -= hh * 1000 * 60 * 60;
+        var mm = Math.floor(msec / 1000 / 60);
+        msec -= mm * 1000 * 60;
+        var ss = Math.floor(msec / 1000);
+        msec -= ss * 1000;
+
+        var ts = "" + ss, tm = "" + mm, th = "" + hh;
+        if( ss < 10 ) ts = "0" + ss;
+        if( mm < 10 ) tm = "0" + mm;
+        if( hh < 10 ) th = "0" + hh;
+        tmp.innerHTML = th+" : "+tm+" : "+ts;
+    }
+    // stop change game timer
+    function stopChangeTime() {
+        clearInterval(chg);
+    }
+
+	window.onload=function(){
+		//alert('hello');
+		for(var i=0; i<imgs.length; i++) imgs[i] = 0;
+		reset();
+	}
+	
+	function reset() {
+		var timer = document.getElementById("timer");
+		var state = document.getElementById("state");
+        var wt = document.getElementById("wait");
+		
+		if( state.innerHTML == "Stopped" ) {
+			alert( "Game is Stopped. Click Start game to start." );
+			return;
+		}
+		
+		timer.innerHTML = "00 : 00 : 00";
+		state.innerHTML = "Stopped";
+        wt.innerHTML = "Wait: 0";
+        clearInterval(myVar);
+        clearInterval(chg);
+		
+		for(var i=0; i<imgs.length; i++) imgs[i] = 0, vis[i] = 0;
+		for( var i=1; i<=16; i++ ) {
+			var t = document.getElementById(""+i);
+			t.innerHTML = "";
+		}
+		
+		clickCnt = 0;
+		clickIdx = 0;
+	}
+	
+	function start() {
+		var state = document.getElementById("state");
+        if( state.innerHTML == "Finished..." ) {
+            alert( "Game is Finished.\nClick Reset button to reset." );
+            return;
+        }
+		if( state.innerHTML == "Running" ) {
+			alert( "Game is already running.\nClick Reset button to reset." );
+			return;
+		}
+		state.innerHTML = "Running";
+        d = new Date();
+        changeTime();
+		
+		for( var i=1; i<=16; i++ ) {
+			var t = document.getElementById(""+i);
+			t.innerHTML = "  ";
+			imgs[i] = 0;
+		}
+		
+		for(var i=1;i<=8;i++) {
+			var rand1 = Math.floor((Math.random() * 16) + 1);
+			while( imgs[ rand1 ] != 0 ) {
+				//alert( imgs[rand1] );
+				var rand1 = Math.floor((Math.random() * 16) + 1);
+			}
+			imgs[rand1] = i;
+			
+			var rand2 = Math.floor((Math.random() * 16) + 1);
+			while( imgs[ rand2 ] != 0 ) {
+				var rand2 = Math.floor((Math.random() * 16) + 1);
+			}
+			
+			imgs[rand2] = i;
+			//alert( rand1+" ---- "+rand2 );
+		}
+		
+		for( var i=1; i<=16; i++ ) {
+			var t = document.getElementById(""+i);
+			//t.innerHTML = "<img src='img/"+imgs[i]+".png'>";
+			//alert( t.innerHTML );
+		}
+	}
+
+    function startTimer () {
+        myVar=setInterval(function(){stopTimer()},100);
+    }
+
+    var cur = 0;
+
+    function stopTimer () {
+        var wt = document.getElementById("wait");
+        if( wt.innerHTML == "Wait: 0" ) wt.innerHTML = "Wait: 3...";
+        else if( wt.innerHTML == "Wait: 3..." ) wt.innerHTML = "Wait: 2...";
+        else if( wt.innerHTML == "Wait: 2..." ) wt.innerHTML = "Wait: 1...";
+        else {
+            wt.innerHTML = "Wait: 0";
+            clearInterval(myVar);
+            var tmp = document.getElementById( ""+clickIdx );
+            tmp.innerHTML = "";
+            tmp = document.getElementById( ""+cur );
+            tmp.innerHTML = "";
+        }
+    }
+
+	function play( self ) {
+        var wt = document.getElementById("wait");
+        if( wt.innerHTML != "Wait: 0" ) {
+            alert( "Cheking... Please keep patience." );
+            return;
+        }
+
+		self.innerHTML = "<img src='img/"+imgs[ parseInt(self.id) ]+".png'>";
+
+		var state = document.getElementById("state");
+		if( state.innerHTML == "Stopped" ) {
+			alert( "Can't do that now. Game is stopped." );
+			return;
+        }
+		
+		cur = parseInt( self.id );
+		
+		if( vis[ cur ] == 2 ) {
+			alert( "No Cheating Allowed!!! You can not click on matched flag!!" );
+			return;
+		} else if( vis[cur] == 1 ) {
+			alert( "No Cheating Allowed!!! You just clicked same item!!" );
+			return;
+		}
+		
+		clickCnt++;
+		if( clickCnt == 2 ) {
+			if( imgs[ clickIdx ] == imgs[ cur ] ) { // matched
+				vis[ clickIdx ] = 2;
+				vis[ cur ] = 2;
+				// check for game over
+                checkOver();
+			} else {
+                startTimer( );
+				//self.innerHTML = "";
+				//var tmp = document.getElementById( ""+clickIdx );
+				//tmp.innerHTML = "";
+                //now = cur;
+				vis[ clickIdx ] = 0;
+				vis[ cur ] = 0;
+			}
+		} else {
+			clickIdx = parseInt( self.id );
+			vis[ clickIdx ] = 1;
+		}
+		
+		clickCnt %= 2;
+	}
+	
+	function checkOver() {
+		var i;
+		for( i=1; i<=16; i++ ) {
+			if( vis[i] != 2 ) break;
+		}
+		// check
+		if( i <= 16 ) {
+			// game not finished
+			return;
+		} else {
+			// finished
+			var state = document.getElementById("state");
+			state.innerHTML = "Finished...";
+			// facebook share------------
+			var body = 'My score in Bombagor er Khela is:' + document.getElementById("timer") + "\n" + "Can you beat my score???";
+			FB.api('/me/feed', 'post', { message: body }, function(response) {
+			  if (!response || response.error) {
+			    alert('Error occured');
+			  } else {
+			    alert('Post ID: ' + response.id);
+			  }
+			});
+			// ends fb share----------------
+            		clearInterval(chg);
+		}
+	}
+	</script>
+</body>
+</html>
